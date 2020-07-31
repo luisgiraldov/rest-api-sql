@@ -3,12 +3,24 @@
 // load modules
 const express = require('express');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const path = require('path');
 
 // variable to enable global error logging
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
 
+// directory references
+const rest_api_sql_dir = path.join(__dirname, '../rest-api-sql');
+
 // create the Express app
 const app = express();
+
+// Express middleware that allows POSTing data
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+// serve up the public folder so we can request static
+// assets from the api
+app.use(express.static(`${rest_api_sql_dir}/public`));
 
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
