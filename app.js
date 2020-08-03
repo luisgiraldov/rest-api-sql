@@ -5,6 +5,9 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const path = require('path');
+const routes = require('./routes');
+const userRoutes = require('./routes/users');
+const courseRoutes = require('./routes/courses');
 
 // variable to enable global error logging
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
@@ -25,14 +28,10 @@ app.use(express.static(`${rest_api_sql_dir}/public`));
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
 
-// TODO setup your api routes here
-
-// setup a friendly greeting for the root route
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to the REST API project!',
-  });
-});
+//Add routes
+app.use('/', routes);
+app.use('/api', userRoutes);
+app.use('/api', courseRoutes);
 
 // send 404 if no other route matched
 app.use((req, res) => {
