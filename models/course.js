@@ -27,6 +27,7 @@ module.exports = (sequelize) => {
                 }
             }
         },
+        userId: Sequelize.INTEGER,
         estimatedTime: Sequelize.STRING,
         materialsNeeded: Sequelize.STRING,
     }, { sequelize });

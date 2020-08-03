@@ -143,24 +143,29 @@ router.post('/users', [
 
   // Add the user to the database.
   (asyncHandler( async (req, res, next) => {
-    const newUser = await User.create({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      emailAddress: user.emailAddress,
-      password: user.password,
-    });
+    let newUser;
+    try{
+      newUser = await User.create({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        emailAddress: user.emailAddress,
+        password: user.password,
+      });
 
-    if(newUser) {
       // Set the status to 201 Created and end the response.
       res.status(201)
-        .redirect('/')
-        .end();
-    } else {
-      res.status(500).json({
-        message: "Error creating user"
-      });
+        .redirect('/');
+    }catch(error){
+      if(error.name === "SequelizeValidationError") {
+        newCourse = await User.build(req.body);
+        res.status(500).send({ 
+            errors: error.errors, 
+        });
+      } else {
+        throw error;
+      } 
     }
-  }))();
+  }))(req, res);
 });
 
 module.exports = router;
