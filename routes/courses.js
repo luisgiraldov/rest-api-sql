@@ -120,4 +120,25 @@ router.post('/courses', [
     }))(req, res);
   });
 
+  router.put('/courses/:id', asyncHandler( async(req, res, next) => {
+        const fieldsToUpdate = req.body;
+        // const spreading = {...fieldsToUpdate};
+        // console.log(fieldsToUpdate);
+        // res.status(200).end();
+        await Course.update(
+            {...fieldsToUpdate},
+            {where: {
+                        id: {
+                            [Op.eq]: req.params.id
+                        }
+                    }
+            },
+        )
+        .then(course => {
+            console.log("sirvio o no? ", course);
+            res.status(204).end();
+        });
+  }));
+
+
 module.exports = router;

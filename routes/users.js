@@ -154,7 +154,8 @@ router.post('/users', [
 
       // Set the status to 201 Created and end the response.
       res.status(201)
-        .redirect('/');
+        .location('/')
+        .end();
     }catch(error){
       if(error.name === "SequelizeValidationError") {
         newCourse = await User.build(req.body);
