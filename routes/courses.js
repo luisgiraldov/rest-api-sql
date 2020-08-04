@@ -120,11 +120,9 @@ router.post('/courses', [
     }))(req, res);
   });
 
+  //Route to update Course
   router.put('/courses/:id', asyncHandler( async(req, res, next) => {
         const fieldsToUpdate = req.body;
-        // const spreading = {...fieldsToUpdate};
-        // console.log(fieldsToUpdate);
-        // res.status(200).end();
         await Course.update(
             {...fieldsToUpdate},
             {where: {
@@ -135,9 +133,22 @@ router.post('/courses', [
             },
         )
         .then(course => {
-            console.log("sirvio o no? ", course);
+            console.log(course.title, " successfully updated");
             res.status(204).end();
         });
+  }));
+
+  //Route to delete course
+  router.delete('/courses/:id', asyncHandler( async(req, res, next) => {
+    await Course.destroy({
+        where: {
+            id: req.params.id
+        }
+    })
+    .then( course => {
+        console.log("Course deleted");
+        res.status(204).end();
+    });
   }));
 
 
