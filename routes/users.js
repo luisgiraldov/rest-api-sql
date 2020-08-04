@@ -159,7 +159,7 @@ router.post('/users', [
     }catch(error){
       if(error.name === "SequelizeValidationError") {
         newCourse = await User.build(req.body);
-        res.status(500).send({ 
+        res.status(400).send({ 
             errors: error.errors, 
         });
       } else {

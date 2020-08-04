@@ -23,7 +23,7 @@ module.exports = (sequelize) => {
             allowNull: false,
             validate: {
                 notEmpty: {
-                    msg: '"Email address" is required'
+                    msg: '"Description" is required'
                 }
             }
         },
@@ -37,6 +37,11 @@ module.exports = (sequelize) => {
             {
                 fieldName: 'userId',
                 allowNull: false,
+                validate: {
+                    notEmpty: {
+                        msg: '"UserID" is required'
+                    }
+                }
             } 
         });
     };

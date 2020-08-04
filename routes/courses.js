@@ -13,9 +13,12 @@ const asyncHandler = middleware => {
     try {
       await middleware(req, res, next);
     } catch (error) {
-        res.status(500).json({
-        error: error.message
-      });
+    //     res.status(500).json({
+    //     error: error.message
+    //   });
+        const err = new Error(error.errors);
+        err.status = 500;
+        next(err);
     }
   };
 };
@@ -56,10 +59,12 @@ router.get('/courses/:id', asyncHandler(async (req, res) => {
             CourseFound: CourseFound
         });
     } else {
-        console.log(CourseFound);
-        res.status(404).json({
-            message: "Course not found"
-        });
+        // res.status(404).json({
+        //     message: "Course not found"
+        // });
+        const err = new Error(error.errors);
+        err.status = 404;
+        next(err);
     }
 }));
 
@@ -82,7 +87,10 @@ router.post('/courses', [
         const errorMessages = errors.array().map(error => error.msg);
 
         // Return the validation errors to the client.
-        return res.status(400).json({ errors: errorMessages });
+        const err = new Error(errorMessages);
+        err.status = 400;
+        next(err);
+        return res.status(400).json({ errors: errorMessages }); 
     }
 
     //Get the user from the request body
@@ -90,29 +98,46 @@ router.post('/courses', [
 
     // Add the user to the database.
     (asyncHandler( async (req, res, next) => {
-        const userId = course.userId ? course.userId : null;
         const estimatedTime = course.estimatedTime ? course.estimatedTime : null;
         const materialsNeeded = course.materialsNeeded ? course.materialsNeeded : null;
         let newCourse;
         try {
-                newCourse = await Course.create({
-                    title: course.title,
-                    description: course.description,
-                    userId: userId,
-                    estimatedTime: estimatedTime,
-                    materialsNeeded: materialsNeeded,
+                newCourse = await Course.findOrCreate({
+                    where: {
+                        title: course.title,
+                        description: course.description,
+                        userId: course.userId,
+                        estimatedTime: estimatedTime,
+                        materialsNeeded: materialsNeeded
+                    },   
                 }).then( data => {
-                    // Set the status to 201 Created and end the response.
-                    res.status(201)
-                    .location(`/api/courses/${data.id}`)
-                    .end();
+                    console.log("data: ", data);
+                    const user = data[0];
+                    const created = data[1];
+                    if(created){
+                        // Set the status to 201 Created and end the response.
+                        res.status(201)
+                        .location(`/api/courses/${user.id}`)
+                        .end();
+                    } else {
+                        //Course title already exists
+                        // res.status(409).send({ 
+                        //     message: "Course already exist!" 
+                        // });
+                        const err = new Error("Course already exists!");
+                        err.status = 409;
+                        next(err);   
+                    } 
                 });
         } catch(error) {
             if(error.name === "SequelizeValidationError") {
-                newCourse = await Course.build(req.body);
-                res.status(500).send({ 
-                    errors: error.errors, 
-                });
+                // newCourse = await Course.build(req.body);
+                // res.status(400).send({ 
+                //     errors: error.errors, 
+                // });
+                const err = new Error(error.errors);
+                err.status = 400;
+                next(err);
               } else {
                 throw error;
               } 
@@ -123,19 +148,33 @@ router.post('/courses', [
   //Route to update Course
   router.put('/courses/:id', asyncHandler( async(req, res, next) => {
         const fieldsToUpdate = req.body;
-        await Course.update(
-            {...fieldsToUpdate},
-            {where: {
-                        id: {
-                            [Op.eq]: req.params.id
+        try {
+            await Course.update(
+                {...fieldsToUpdate},
+                {where: {
+                            id: {
+                                [Op.eq]: req.params.id
+                            }
                         }
-                    }
-            },
-        )
-        .then(course => {
-            console.log(course.title, " successfully updated");
-            res.status(204).end();
-        });
+                },
+            )
+            .then(course => {
+                console.log("Course: " + req.params.id + " successfully updated");
+                res.status(204).end();
+            });
+        } catch(error){
+            if(error.name === "SequelizeValidationError") {
+                // newCourse = await Course.build(req.body);
+                // res.status(400).send({ 
+                //     errors: error.errors, 
+                // });
+                const err = new Error(error.errors);
+                err.status = 400;
+                next(err);
+              } else {
+                throw error;
+              } 
+        }
   }));
 
   //Route to delete course
@@ -146,7 +185,7 @@ router.post('/courses', [
         }
     })
     .then( course => {
-        console.log("Course deleted");
+        console.log("Course: " + req.params.id + " successfully deleted");
         res.status(204).end();
     });
   }));
