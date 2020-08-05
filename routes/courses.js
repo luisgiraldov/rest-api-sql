@@ -16,7 +16,7 @@ const asyncHandler = middleware => {
     //     res.status(500).json({
     //     error: error.message
     //   });
-        const err = new Error(error.errors);
+        const err = new Error(error.message);
         err.status = 500;
         next(err);
     }
@@ -59,12 +59,9 @@ router.get('/courses/:id', asyncHandler(async (req, res) => {
             CourseFound: CourseFound
         });
     } else {
-        // res.status(404).json({
-        //     message: "Course not found"
-        // });
-        const err = new Error(error.errors);
-        err.status = 404;
-        next(err);
+        res.status(404).json({
+            message: "Course not found"
+        });
     }
 }));
 
@@ -76,7 +73,7 @@ router.post('/courses', [
     check('description')
     .exists({ checkNull: true, checkFalsy: true})
     .withMessage('Please provide a value for "description"'),
-  ], (req, res) => {
+  ], (req, res, next) => {
 
     // Attempt to get the validation result from the Request object.
     const errors = validationResult(req);
@@ -87,9 +84,6 @@ router.post('/courses', [
         const errorMessages = errors.array().map(error => error.msg);
 
         // Return the validation errors to the client.
-        const err = new Error(errorMessages);
-        err.status = 400;
-        next(err);
         return res.status(400).json({ errors: errorMessages }); 
     }
 
@@ -111,8 +105,7 @@ router.post('/courses', [
                         materialsNeeded: materialsNeeded
                     },   
                 }).then( data => {
-                    console.log("data: ", data);
-                    const user = data[0];
+                    const  user = data[0];
                     const created = data[1];
                     if(created){
                         // Set the status to 201 Created and end the response.
@@ -120,10 +113,6 @@ router.post('/courses', [
                         .location(`/api/courses/${user.id}`)
                         .end();
                     } else {
-                        //Course title already exists
-                        // res.status(409).send({ 
-                        //     message: "Course already exist!" 
-                        // });
                         const err = new Error("Course already exists!");
                         err.status = 409;
                         next(err);   
@@ -142,7 +131,7 @@ router.post('/courses', [
                 throw error;
               } 
         }
-    }))(req, res);
+    }))(req, res, next);
   });
 
   //Route to update Course

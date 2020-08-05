@@ -15,9 +15,12 @@ const asyncHandler = middleware => {
     try {
       await middleware(req, res, next);
     } catch (error) {
-      res.status(500).json({
-        error: error.message
-      });
+      // res.status(500).json({
+      //   error: error.message
+      // });
+      const err = new Error(error.message);
+      err.status = 500;
+      next(err);
     }
   };
 };
@@ -33,8 +36,7 @@ const authenticateUser = (req, res, next) => {
       // Attempt to retrieve the user from the data store
       // by their username (i.e. the user's "key"
       // from the Authorization header).
-      (async () => {
-        try {
+      (asyncHandler(async (req, res, next) => {
           await User.findAll({
             where: {
               emailAddress: {
@@ -78,12 +80,7 @@ const authenticateUser = (req, res, next) => {
               }).end();
             }
           });
-        } catch(error) {
-          res.status(500).json({
-            error: error.message
-          });
-        } 
-      })(); 
+      }))(req, res, next); 
   } else {
     message = 'Auth header not found';
   }
@@ -158,10 +155,13 @@ router.post('/users', [
         .end();
     }catch(error){
       if(error.name === "SequelizeValidationError") {
-        newCourse = await User.build(req.body);
-        res.status(400).send({ 
-            errors: error.errors, 
-        });
+        // newCourse = await User.build(req.body);
+        // res.status(400).send({ 
+        //     errors: error.errors, 
+        // });
+        const err = new Error(error.errors);
+        err.status = 400;
+        next(err);
       } else {
         throw error;
       } 
