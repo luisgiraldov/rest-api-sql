@@ -51,7 +51,6 @@ app.use((err, req, res, next) => {
     // error: {
     //   error: err.stack
     // },
-    error: {},
   });
 });
 

@@ -41,7 +41,7 @@ module.exports = (sequelize) => {
                     notEmpty: {
                         msg: '"UserID" is required'
                     }
-                }
+                },
             } 
         });
     };
