@@ -71,7 +71,7 @@ const authenticateUser = async (req, res, next) => {
               } else {
                   message = `User not found for username: ${credentials.name}`;
                   const err = new Error(message);
-                  err.status = 404;
+                  err.status = 401;
                   next(err);
                 }
             });
@@ -79,7 +79,7 @@ const authenticateUser = async (req, res, next) => {
     } else {
         message = 'Auth header not found';
         const err = new Error(message);
-        err.status = 404;
+        err.status = 401;
         next(err);
       }
   };

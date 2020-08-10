@@ -118,8 +118,8 @@ router.post('/courses', [
                     if(created){
                         // Set the status to 201 Created and end the response.
                         res.status(201)
-                        // .location(`/api/courses/${courseReturned.id}`)
-                        .location('/')
+                        .location(`/api/courses/${courseReturned.id}`)
+                        // .location('/')
                         .end();
                     } else {
                         const err = new Error("Course already exists!");
@@ -180,6 +180,13 @@ router.post('/courses', [
 
             const getCourse = await Course.findByPk(req.params.id);
 
+            //If the course is not found return a 404 error
+            if(getCourse === null){
+                return res.status(404).json({
+                    message: "Course not found"
+                });
+            }
+
             if(user.id != getCourse.userId) {
                 // Return to stop execution due to authentication error.
                 return res.status(403).json({
@@ -207,7 +214,7 @@ router.post('/courses', [
               } else {
                 //console.log(error.errors)
                 throw error;
-              } 
+              }
         }
   }));
 
@@ -224,6 +231,13 @@ router.post('/courses', [
     }
 
     const getCourse = await Course.findByPk(req.params.id);
+
+    //If the course is not found return a 404 error
+    if(getCourse === null){
+        return res.status(404).json({
+            message: "Course not found"
+        });
+    }
 
     if(user.id != getCourse.userId) {
         // Return to stop execution due to authentication error.
