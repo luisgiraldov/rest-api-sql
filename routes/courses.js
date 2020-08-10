@@ -118,7 +118,8 @@ router.post('/courses', [
                     if(created){
                         // Set the status to 201 Created and end the response.
                         res.status(201)
-                        .location(`/api/courses/${courseReturned.id}`)
+                        // .location(`/api/courses/${courseReturned.id}`)
+                        .location('/')
                         .end();
                     } else {
                         const err = new Error("Course already exists!");
@@ -128,11 +129,7 @@ router.post('/courses', [
                 });
         } catch(error) {
             if(error.name === "SequelizeValidationError") {
-                // newCourse = await Course.build(req.body);
-                // res.status(400).send({ 
-                //     errors: error.errors, 
-                // });
-                const err = new Error(error.errors);
+                const err = new Error(error.message);
                 err.status = 400;
                 next(err);
             } else if( error.name === "SequelizeForeignKeyConstraintError") {
@@ -202,19 +199,6 @@ router.post('/courses', [
                     console.log("Course: " + req.params.id + " successfully updated");
                     res.status(204).end();
                 });
-            // await Course.update(
-            //     {...fieldsToUpdate},
-            //     {where: {
-            //                 id: {
-            //                     [Op.eq]: req.params.id
-            //                 }
-            //             }
-            //     },
-            // )
-            // .then(course => {
-            //     console.log("Course: " + req.params.id + " successfully updated");
-            //     res.status(204).end();
-            // });
         } catch(error){
             if(error.name === "SequelizeValidationError") {
                 const err = new Error(error.errors);

@@ -37,6 +37,9 @@ const authenticateUser = async (req, res, next) => {
                 emailAddress: {
                   [Op.eq]: credentials.name,
                 }
+              },
+              attributes: {
+                exclude: ['createdAt', 'updatedAt']
               }
             }).then( data => {
               const user = data[0];

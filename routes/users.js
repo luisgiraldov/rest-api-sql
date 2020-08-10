@@ -17,6 +17,8 @@ router.get('/users', asyncHandler(async (req, res, next) => {
     if(user) {
       res.status(200).json({
                 username: user.emailAddress,
+                firstName: user.firstName,
+                lastName: user.lastName
               });
     }
  })
@@ -81,10 +83,6 @@ router.post('/users', [
       });
     } catch(error){
       if(error.name === "SequelizeValidationError") {
-        // newCourse = await User.build(req.body);
-        // res.status(400).send({ 
-        //     errors: error.errors, 
-        // });
         const err = new Error(error.errors);
         err.status = 400;
         next(err);
