@@ -46,6 +46,19 @@ module.exports = (sequelize) => {
             validate: {
                 notEmpty: {
                     msg: '"Password" is required'
+                },
+                len: {
+                    args: [8, ],
+                    msg: "Password has to be 8 characters or more"
+                }
+            }
+        },
+        salt: {
+            type: Sequelize.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: {
+                    msg: "Salt cannot be empty"
                 }
             }
         },

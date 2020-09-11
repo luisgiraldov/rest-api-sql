@@ -41,13 +41,13 @@ router.post('/users', [
   check('password')
   .exists({ checkNull: true, checkFalsy: true })
   .withMessage('Please provide a value for "password"'),
+  check('password')
+  .isLength({min: 8, max: undefined})
+  .withMessage('Password must be 8 characters long or more')
 ], (req, res, next) => {
-  //Validate Email
-
-
+  
   // Attempt to get the validation result from the Request object.
   const errors = validationResult(req);
-
   // If there are validation errors...
   if (!errors.isEmpty()) {
     // Use the Array `map()` method to get a list of error messages.
@@ -59,12 +59,12 @@ router.post('/users', [
   // Get the user from the request body.
   const user = req.body;
 
-  
+  //Generate Salt
+  const salt = bcryptjs.genSaltSync(10);
 
   // Hash the new user's password.
-  // const salt = bcrypt.genSaltSync(10);
   //to implement the hash and salt, go to https://github.com/dcodeIO/bcrypt.js
-  user.password = bcryptjs.hashSync(user.password);
+  user.password = bcryptjs.hashSync(user.password, salt);
 
   // Add the user to the database.
   (asyncHandler( async (req, res, next) => {
@@ -73,8 +73,9 @@ router.post('/users', [
       newUser = await User.create({
         firstName: user.firstName,
         lastName: user.lastName,
-        emailAddress: user.emailAddress,
+        emailAddress: user.emailAddress.toLowerCase(),
         password: user.password,
+        salt,
       }).then( data => {
         // Set the status to 201 Created and end the response.
         res.status(201)
@@ -84,14 +85,15 @@ router.post('/users', [
     } catch(error){
       if(error.name === "SequelizeValidationError") {
         const err = new Error(error.errors);
+        console.log(error.stack);
         err.status = 400;
         next(err);
-      } else if(error.errors[0].type === "unique violation"){
+      } else if(error.errors && error.errors[0].type === "unique violation"){
           const err = new Error("There is a user associated to this email address!");
           err.status = 409;
           next(err);
       } else {
-            // console.log(error.errors);
+            console.log(error.stack);
             throw error;
         } 
     }
